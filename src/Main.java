@@ -2,19 +2,20 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.text.DecimalFormat;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+enum METHOD
+{
+    GET,POST
+}
 public class Main {
     public static void main(String[] args) throws MyRuntimeException {
 
         String path = "C:\\Users\\asabanin\\Downloads\\access.log";
         FileReader fileReader = null;
 
-        int iGooglebotCount = 0;
-        int iGoogleBotCount = 0;
-        int iYandexCount = 0;
+        String strLastLineBrowser ="";
+        String strLastLineOS ="";
+
         try {
             fileReader = new FileReader(path);
         } catch (FileNotFoundException e) {
@@ -29,6 +30,8 @@ public class Main {
         // Для разбора лога по фрагментам
         String regex = "^([\\d.]+) (\\S+) (\\S+) \\[([\\w:/]+\\s[+-]\\d{4})\\] \"(.+?)\" (\\d{3}) (\\d+) \"([^\"]+)\" \"(.+?)\"";
 
+        Statistics statistics = new Statistics();
+
         while (true) {
             try {
                 if (!((line = reader.readLine()) != null)) break;
@@ -41,69 +44,29 @@ public class Main {
                 throw new MyRuntimeException("В файле встречается строка длинее 1024 символов");
             }
 
-            Pattern p = Pattern.compile(regex);
-            Matcher matcher = p.matcher(line);
+            LogEntry logEntry = new LogEntry(line);
 
-            if (matcher.find()) {
+            //if (logEntry.getEnumMethod().equals(METHOD.POST)) {
+            //    System.out.println(" " + logEntry);
+            //}
 
-                // Нашли User-Agent
-                String strUserAgent = matcher.group(9);
+            UserAgent userAgent = new UserAgent(logEntry.getStrUserAgent());
 
-                //Нашли все вхождения по скобкам
-                Matcher m = Pattern.compile("\\((.*?)\\)").matcher(strUserAgent);
+            //System.out.println(" " + userAgent);
 
-                while (m.find()) {
-                    // Нашли первые скобки
-                    String firstBrackets = m.group(0);
-                    String[] parts = firstBrackets.split(";");
+            statistics.addEntry(logEntry);
 
-                    if (parts.length >= 2) {
-                        String fragment = parts[1];
+             strLastLineBrowser = userAgent.getBrowserName();
+             strLastLineOS = userAgent.getBrowserOperatingSystem();
 
-                        //Очистим от пробелов
-                        String replacedString = fragment.replace(" ", "");
-
-                        // найдем до слэша
-                        String[] nosleshString = replacedString.split("/");
-
-                        // Нашли бота
-                        String strBot = nosleshString[0];
-
-                        // Равно GoogleBot (заглавная b)
-                        if (strBot.equals("GoogleBot")) {
-                            iGoogleBotCount++;
-                        }
-
-                        //  Равно Googlebot (строчная b)
-                        if (strBot.equals("Googlebot")) {
-                            iGooglebotCount++;
-                        }
-
-                        if (strBot.equals("YandexBot")) {
-                            iYandexCount++;
-                        }
-                        // Второй фрагмент со скобками не ищем
-                        break;
-                    }
-                }
-
-            }
-            iCount++;
         }
 
-        DecimalFormat decimalFormat = new DecimalFormat("#.###");
+        System.out.println("Браузер в последней строке " + strLastLineBrowser);
+        System.out.println("OS в последней строке " + strLastLineOS);
+        System.out.println("Минимальное время: " + statistics.getMinTime());
+        System.out.println("Максимальное время: " + statistics.getMaxTime());
+        System.out.println("Всего байт: " + statistics.getLongTraffic());
+        System.out.println("Байт/час: " + statistics.getTrafficRate());
 
-        System.out.println("Число линий: " + iCount);
-        System.out.println("Число YandexBot: " + iYandexCount);
-        System.out.println("Число GoogleBot: " + iGoogleBotCount);
-        System.out.println("Число Googlebot: " + iGooglebotCount);
-
-        String s1 = String.format("%1$,.2f", (100*(double)iYandexCount/iCount));
-        String s2= String.format("%1$,.2f", (100*(double)iGoogleBotCount/iCount));
-        String s3= String.format("%1$,.2f", (100*(double)iGooglebotCount/iCount));
-
-        System.out.println("Доля YandexBot: " + s1 + "%");
-        System.out.println("Доля GoogleBot: " + s2 + "%");
-        System.out.println("Доля Googlebot: " + s3 + "%");
     }
 }
