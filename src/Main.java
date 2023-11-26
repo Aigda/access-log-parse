@@ -2,15 +2,19 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Main {
     public static void main(String[] args) throws MyRuntimeException {
 
         String path = "C:\\Users\\asabanin\\Downloads\\access.log";
         FileReader fileReader = null;
-        int iMinLength = 0;
-        int iMaxLength = 0;
-        boolean bFirstInit = true;
+
+        int iGooglebotCount = 0;
+        int iGoogleBotCount = 0;
+        int iYandexCount = 0;
         try {
             fileReader = new FileReader(path);
         } catch (FileNotFoundException e) {
@@ -21,6 +25,10 @@ public class Main {
         String line;
         int length = 0;
         int iCount = 0;
+
+        // Для разбора лога по фрагментам
+        String regex = "^([\\d.]+) (\\S+) (\\S+) \\[([\\w:/]+\\s[+-]\\d{4})\\] \"(.+?)\" (\\d{3}) (\\d+) \"([^\"]+)\" \"(.+?)\"";
+
         while (true) {
             try {
                 if (!((line = reader.readLine()) != null)) break;
@@ -33,44 +41,69 @@ public class Main {
                 throw new MyRuntimeException("В файле встречается строка длинее 1024 символов");
             }
 
-            if (bFirstInit) {
-                bFirstInit = false;
-                iMaxLength = length;
-                iMinLength = length;
+            Pattern p = Pattern.compile(regex);
+            Matcher matcher = p.matcher(line);
+
+            if (matcher.find()) {
+
+                // Нашли User-Agent
+                String strUserAgent = matcher.group(9);
+
+                //Нашли все вхождения по скобкам
+                Matcher m = Pattern.compile("\\((.*?)\\)").matcher(strUserAgent);
+
+                while (m.find()) {
+                    // Нашли первые скобки
+                    String firstBrackets = m.group(0);
+                    String[] parts = firstBrackets.split(";");
+
+                    if (parts.length >= 2) {
+                        String fragment = parts[1];
+
+                        //Очистим от пробелов
+                        String replacedString = fragment.replace(" ", "");
+
+                        // найдем до слэша
+                        String[] nosleshString = replacedString.split("/");
+
+                        // Нашли бота
+                        String strBot = nosleshString[0];
+
+                        // Равно GoogleBot (заглавная b)
+                        if (strBot.equals("GoogleBot")) {
+                            iGoogleBotCount++;
+                        }
+
+                        //  Равно Googlebot (строчная b)
+                        if (strBot.equals("Googlebot")) {
+                            iGooglebotCount++;
+                        }
+
+                        if (strBot.equals("YandexBot")) {
+                            iYandexCount++;
+                        }
+                        // Второй фрагмент со скобками не ищем
+                        break;
+                    }
+                }
+
             }
-
-            if (length > iMaxLength) iMaxLength = length;
-            if (length < iMinLength) iMinLength = length;
-
             iCount++;
         }
 
+        DecimalFormat decimalFormat = new DecimalFormat("#.###");
+
         System.out.println("Число линий: " + iCount);
-        System.out.println("Длина самой длинной линии: " + iMaxLength);
-        System.out.println("Длина самой короткой линии: " + iMinLength);
+        System.out.println("Число YandexBot: " + iYandexCount);
+        System.out.println("Число GoogleBot: " + iGoogleBotCount);
+        System.out.println("Число Googlebot: " + iGooglebotCount);
 
-/*
-        System.out.println("Введите первое число: ");
-        int firstNumber = new Scanner(System.in).nextInt();
+        String s1 = String.format("%1$,.2f", (100*(double)iYandexCount/iCount));
+        String s2= String.format("%1$,.2f", (100*(double)iGoogleBotCount/iCount));
+        String s3= String.format("%1$,.2f", (100*(double)iGooglebotCount/iCount));
 
-        System.out.println("Введите второе число: ");
-        int secondNumber = new Scanner(System.in).nextInt();
-
-        //int firstNumber = 5;
-        //int secondNumber = 10;
-
-        int sumNumbers = firstNumber + secondNumber;
-        int subNumbers = firstNumber - secondNumber;
-        int multNumbers = firstNumber * secondNumber;
-        double quotientNumbers  = (double) firstNumber / secondNumber;
-
-        System.out.println("Были введены следующие числа : " + firstNumber + " и " + secondNumber);
-        System.out.println("Сумма чисел: " + sumNumbers);
-        System.out.println("Разность чисел: " + subNumbers);
-        System.out.println("Умножение чисел: " + multNumbers);
-        System.out.println("Частное чисел: " + quotientNumbers);
-
-
- */
+        System.out.println("Доля YandexBot: " + s1 + "%");
+        System.out.println("Доля GoogleBot: " + s2 + "%");
+        System.out.println("Доля Googlebot: " + s3 + "%");
     }
 }
