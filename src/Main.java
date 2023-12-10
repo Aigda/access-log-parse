@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Map;
 
 enum METHOD
 {
@@ -68,5 +69,23 @@ public class Main {
         System.out.println("Всего байт: " + statistics.getLongTraffic());
         System.out.println("Байт/час: " + statistics.getTrafficRate());
 
+        System.out.println(statistics.getListOfAllExistingPages().size());
+
+        System.out.println(statistics.getListOfOperationSystem());
+
+        Double sumDouble = 0.0;
+        for (Map.Entry<String, Double> entry : statistics.getListOfOperationSystem().entrySet())
+        {
+            String key = entry.getKey();
+            Double value = entry.getValue();
+
+            sumDouble = sumDouble + value;
+
+            System.out.println(key + "   " + value );
+        }
+        System.out.println(" Сумма всех долей " + sumDouble);
+
     }
+
+
 }

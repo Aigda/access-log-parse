@@ -4,13 +4,16 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.Locale;
+import java.util.*;
 
 public class Statistics {
 
     LocalDateTime maxTime  = LocalDateTime.of(1020, 9, 9, 19, 46, 45);
     LocalDateTime  minTime  = LocalDateTime.of(3020, 9, 9, 16, 46, 45);
+
+    public Statistics() {
+
+    }
 
     public LocalDateTime getMaxTime() {
         return maxTime;
@@ -25,6 +28,12 @@ public class Statistics {
     }
 
     Long longTraffic = 0L;
+
+    ArrayList<String> listOfAllExistingPages = new ArrayList<>();
+
+    HashSet<String> pages = new HashSet<String>();
+    HashMap<String, Integer> operationStats = new HashMap<String, Integer> ();
+
 
     public  void addEntry(LogEntry logEntry){
         longTraffic = longTraffic + Long.parseLong(logEntry.getStrBytesSent());
@@ -55,6 +64,33 @@ public class Statistics {
             maxTime = zonedDateTime.toLocalDateTime();
         }
 
+       // добавляем в список все существующие страницы
+       // System.out.println(logEntry.getStrResponse());
+        if (Objects.equals(logEntry.getStrResponse(), "200")) {
+            pages.add(logEntry.getStrRequest());
+        }
+
+        // добавляем статистику операционных систем
+        //String oper = logEntry.getStrUserAgent();
+
+        UserAgent userAgent = new UserAgent(logEntry.getStrUserAgent());
+
+        //System.out.println(" " + userAgent);
+
+        String strBrowser = userAgent.getBrowserName();
+        String strOS = userAgent.getBrowserOperatingSystem();
+
+        if (strOS != null) {
+            if (operationStats.containsKey(strOS)) {
+                int countOperSys = operationStats.get(strOS) + 1;
+                operationStats.put(strOS, countOperSys);
+            } else {
+                operationStats.put(strOS, 1);
+            }
+        }
+
+
+
     }
 
     public Long getTrafficRate() {
@@ -67,4 +103,32 @@ public class Statistics {
 
         return longTraffic/hours;
     }
+
+    public ArrayList<String> getListOfAllExistingPages()
+    {
+        listOfAllExistingPages.addAll(pages);
+        return listOfAllExistingPages;
+    }
+    public HashMap<String, Double> getListOfOperationSystem()
+    {
+        HashMap<String, Double> ratio = new HashMap<String, Double>();
+
+        // пройдем по всему списку
+        int countOperAll = 0;
+        for(Map.Entry<String, Integer> entry : operationStats.entrySet()) {
+            String key = entry.getKey();
+            Integer value = entry.getValue();
+            countOperAll = countOperAll + value;
+        }
+
+        for(Map.Entry<String, Integer> entry : operationStats.entrySet()) {
+            String key = entry.getKey();
+            Integer value = entry.getValue();
+
+            ratio.put(key,(double)value/countOperAll);
+        }
+
+        return ratio;
+    }
+
 }
