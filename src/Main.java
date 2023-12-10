@@ -2,7 +2,10 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 enum METHOD
 {
@@ -84,6 +87,35 @@ public class Main {
             System.out.println(key + "   " + value );
         }
         System.out.println(" Сумма всех долей " + sumDouble);
+
+
+        // Метода возвращает список не существующих странц сайта
+        System.out.println(statistics.getListOfNotExistingPages().size());
+
+        // Метод возвращает список браузеров
+        System.out.println(statistics.getListOfBrowsers());
+
+        // Метод по возвращение статистики браузеров
+        Double sumDoubleBreowser = 0.0;
+        for (Map.Entry<String, Double> entry : statistics.getListOfBrowsers().entrySet())
+        {
+            String key = entry.getKey();
+            Double value = entry.getValue();
+
+            sumDoubleBreowser = sumDoubleBreowser + value;
+
+            System.out.println(key + "   " + value );
+        }
+        System.out.println(" Сумма всех долей " + sumDoubleBreowser);
+
+
+        //проверим уникальность с помощью сортировки
+        Stream<Map.Entry<String, Double>> stream = statistics.getListOfBrowsers().entrySet().stream();
+
+        System.out.println(" сортируем для проверки уникальности: " );
+        stream.sorted(Map.Entry.<String, Double>comparingByKey())
+                .forEach(x -> System.out.println(x.getKey() + " " + x.getValue()));
+
 
     }
 

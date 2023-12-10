@@ -30,9 +30,12 @@ public class Statistics {
     Long longTraffic = 0L;
 
     ArrayList<String> listOfAllExistingPages = new ArrayList<>();
+    ArrayList<String> listOfNotExistingPages = new ArrayList<>();
 
     HashSet<String> pages = new HashSet<String>();
+    HashSet<String> noPages = new HashSet<String>();
     HashMap<String, Integer> operationStats = new HashMap<String, Integer> ();
+    HashMap<String, Integer> browserStats = new HashMap<String, Integer> ();
 
 
     public  void addEntry(LogEntry logEntry){
@@ -89,6 +92,15 @@ public class Statistics {
             }
         }
 
+        if (strBrowser != null) {
+            if (browserStats.containsKey(strBrowser)) {
+                int countBrowser = browserStats.get(strBrowser) + 1;
+                browserStats.put(strBrowser, countBrowser);
+            } else {
+                browserStats.put(strBrowser, 1);
+            }
+        }
+
 
 
     }
@@ -109,6 +121,12 @@ public class Statistics {
         listOfAllExistingPages.addAll(pages);
         return listOfAllExistingPages;
     }
+
+    public ArrayList<String> getListOfNotExistingPages()
+    {
+        listOfNotExistingPages.addAll(noPages);
+        return listOfNotExistingPages;
+    }
     public HashMap<String, Double> getListOfOperationSystem()
     {
         HashMap<String, Double> ratio = new HashMap<String, Double>();
@@ -126,6 +144,28 @@ public class Statistics {
             Integer value = entry.getValue();
 
             ratio.put(key,(double)value/countOperAll);
+        }
+
+        return ratio;
+    }
+
+    public HashMap<String, Double> getListOfBrowsers()
+    {
+        HashMap<String, Double> ratio = new HashMap<String, Double>();
+
+        // пройдем по всему списку
+        int countBrowsersAll = 0;
+        for(Map.Entry<String, Integer> entry : browserStats.entrySet()) {
+            String key = entry.getKey();
+            Integer value = entry.getValue();
+            countBrowsersAll = countBrowsersAll + value;
+        }
+
+        for(Map.Entry<String, Integer> entry : browserStats.entrySet()) {
+            String key = entry.getKey();
+            Integer value = entry.getValue();
+
+            ratio.put(key,(double)value/countBrowsersAll);
         }
 
         return ratio;
