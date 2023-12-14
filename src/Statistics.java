@@ -73,6 +73,13 @@ public class Statistics {
             pages.add(logEntry.getStrRequest());
         }
 
+        // добавляем в список все несуществующие страницы
+        // System.out.println(logEntry.getStrResponse());
+        if (Objects.equals(logEntry.getStrResponse(), "404")) {
+            noPages.add(logEntry.getStrRequest());
+        }
+
+
         // добавляем статистику операционных систем
         //String oper = logEntry.getStrUserAgent();
 
