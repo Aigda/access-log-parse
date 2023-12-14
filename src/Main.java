@@ -116,7 +116,8 @@ public class Main {
         stream.sorted(Map.Entry.<String, Double>comparingByKey())
                 .forEach(x -> System.out.println(x.getKey() + " " + x.getValue()));
 
-
+        // Метода возвращает список не существующих странц сайта
+        System.out.println(statistics.getListOfNotExistingPages());
     }
 
 
