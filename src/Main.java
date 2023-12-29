@@ -36,6 +36,8 @@ public class Main {
 
         Statistics statistics = new Statistics();
 
+        Statistics statisticsNotBot = new Statistics();
+
         while (true) {
             try {
                 if (!((line = reader.readLine()) != null)) break;
@@ -63,15 +65,48 @@ public class Main {
              strLastLineBrowser = userAgent.getBrowserName();
              strLastLineOS = userAgent.getBrowserOperatingSystem();
 
+             if (!userAgent.isBot()) {
+                statisticsNotBot.addEntry(logEntry);
+             }
+
         }
 
-        System.out.println("Браузер в последней строке " + strLastLineBrowser);
+        // Новая статистика для не ботов
+        System.out.println("Минимальное время не ботов: " + statisticsNotBot.getMinTime());
+        System.out.println("Максимальное время не ботов: " + statisticsNotBot.getMaxTime());
+        System.out.println("Пользователей (не ботов)/час: " + statisticsNotBot.getUsersRate());
+        System.out.println("Число ошибочных случаев: " + statisticsNotBot.getListErrorRequest().size());
+        System.out.println("Число ошибок: " + statisticsNotBot.getIntErrorRequestCount());
+        System.out.println("Ошибочных запросов/час: " + statisticsNotBot.getErrorRequestRate());
+
+        System.out.println("Пользователей всего: " + statisticsNotBot.getUserAgentList().size());
+
+
+        Stream<String> streamIP = statisticsNotBot.getListIP().stream();
+        Stream<String> streamUniqueIP = statisticsNotBot.getListIP().stream();
+
+
+        System.out.println("Всего IP: " + statisticsNotBot.getListIP().size());
+        System.out.println("Всего IP через поток: " + + streamIP.count());
+        long lUniqueIp = streamUniqueIP.distinct().count();
+        System.out.println("Уникальных IP: " + lUniqueIp);
+        System.out.println("Средняя посещаемость пользователем: " + (double)statisticsNotBot.getUserAgentList().size()/lUniqueIp);
+        //проверим уникальность с помощью сортировки
+        /*
+        streamIP.distinct().sorted()
+                .forEach(System.out::println);
+         */
+
+
+       /* System.out.println("Браузер в последней строке " + strLastLineBrowser);
         System.out.println("OS в последней строке " + strLastLineOS);
         System.out.println("Минимальное время: " + statistics.getMinTime());
         System.out.println("Максимальное время: " + statistics.getMaxTime());
         System.out.println("Всего байт: " + statistics.getLongTraffic());
         System.out.println("Байт/час: " + statistics.getTrafficRate());
 
+
+        System.out.println(statisticsNotBot.getListOfAllExistingPages().size());
         System.out.println(statistics.getListOfAllExistingPages().size());
 
         System.out.println(statistics.getListOfOperationSystem());
@@ -118,6 +153,9 @@ public class Main {
 
         // Метода возвращает список не существующих странц сайта
         System.out.println(statistics.getListOfNotExistingPages());
+
+
+         */
     }
 
 

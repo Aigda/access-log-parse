@@ -31,11 +31,32 @@ public class Statistics {
 
     ArrayList<String> listOfAllExistingPages = new ArrayList<>();
     ArrayList<String> listOfNotExistingPages = new ArrayList<>();
+    ArrayList<String> listOfIP = new ArrayList<>();
+
+    public int getIntErrorRequestCount() {
+        return intErrorRequestCount;
+    }
+
+    ArrayList<String> listErrorRequest = new ArrayList<>();
+    int intErrorRequestCount = 0;
 
     HashSet<String> pages = new HashSet<String>();
     HashSet<String> noPages = new HashSet<String>();
+
+
+
+    HashSet<String> listIP = new HashSet<String>();
+
+
+
     HashMap<String, Integer> operationStats = new HashMap<String, Integer> ();
     HashMap<String, Integer> browserStats = new HashMap<String, Integer> ();
+
+    public ArrayList<UserAgent> getUserAgentList() {
+        return userAgentList;
+    }
+
+    ArrayList<UserAgent> userAgentList = new ArrayList<>();
 
 
     public  void addEntry(LogEntry logEntry){
@@ -79,11 +100,26 @@ public class Statistics {
             noPages.add(logEntry.getStrRequest());
         }
 
+        listIP.add(logEntry.getStrIPAddress());
+
+        // Найдем все ошибки
+        // Получим цифровое значение кода
+        if (logEntry.getStrResponse().length()==3) {
+            int intCodeRequest = Integer.parseUnsignedInt(logEntry.getStrResponse());
+            if (intCodeRequest >= 400 && intCodeRequest <=599) {
+                listErrorRequest.add(logEntry.getStrRequest());
+                intErrorRequestCount = intErrorRequestCount + 1;
+            }
+        }
+
+
 
         // добавляем статистику операционных систем
         //String oper = logEntry.getStrUserAgent();
 
         UserAgent userAgent = new UserAgent(logEntry.getStrUserAgent());
+
+        userAgentList.add(userAgent);
 
         //System.out.println(" " + userAgent);
 
@@ -123,6 +159,17 @@ public class Statistics {
         return longTraffic/hours;
     }
 
+    public Long getUsersRate() {
+        Duration duration = Duration.between(minTime, maxTime);
+
+        long seconds = duration.getSeconds();
+
+        long hours = seconds / 3660;
+        if (hours == 0) return 0L;
+
+        return this.getUserAgentList().size()/hours;
+    }
+
     public ArrayList<String> getListOfAllExistingPages()
     {
         listOfAllExistingPages.addAll(pages);
@@ -133,6 +180,12 @@ public class Statistics {
     {
         listOfNotExistingPages.addAll(noPages);
         return listOfNotExistingPages;
+    }
+
+    public ArrayList<String> getListIP()
+    {
+        listOfIP.addAll(listIP);
+        return listOfIP;
     }
     public HashMap<String, Double> getListOfOperationSystem()
     {
@@ -177,5 +230,25 @@ public class Statistics {
 
         return ratio;
     }
+
+
+
+    public ArrayList<String> getListErrorRequest()
+    {
+        //listErrorRequest.addAll(listErrorRequest);
+        return listErrorRequest;
+    }
+
+    public double getErrorRequestRate() {
+        Duration duration = Duration.between(minTime, maxTime);
+
+        long seconds = duration.getSeconds();
+
+        long hours = seconds / 3660;
+        if (hours == 0) return 0L;
+
+        return (double)this.intErrorRequestCount/hours;
+    }
+
 
 }
