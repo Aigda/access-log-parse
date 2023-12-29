@@ -60,6 +60,11 @@ public class Statistics {
 
 
     public  void addEntry(LogEntry logEntry){
+
+        if (!logEntry.getStrIPAddress().equals("104.124.156.139"))
+        {
+           // return;
+        }
         longTraffic = longTraffic + Long.parseLong(logEntry.getStrBytesSent());
 
 
@@ -100,7 +105,12 @@ public class Statistics {
             noPages.add(logEntry.getStrRequest());
         }
 
-        listIP.add(logEntry.getStrIPAddress());
+        listOfIP.add(logEntry.getStrIPAddress());
+
+        if (logEntry.getStrIPAddress().equals("104.124.156.139"))
+        {
+            //System.out.println(listOfIP.size());
+        }
 
         // Найдем все ошибки
         // Получим цифровое значение кода
@@ -184,7 +194,7 @@ public class Statistics {
 
     public ArrayList<String> getListIP()
     {
-        listOfIP.addAll(listIP);
+        //listOfIP.addAll(listIP);
         return listOfIP;
     }
     public HashMap<String, Double> getListOfOperationSystem()
