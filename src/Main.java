@@ -3,9 +3,13 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toMap;
 
 enum METHOD
 {
@@ -62,11 +66,16 @@ public class Main {
 
             statistics.addEntry(logEntry);
 
+
              strLastLineBrowser = userAgent.getBrowserName();
              strLastLineOS = userAgent.getBrowserOperatingSystem();
 
              if (!userAgent.isBot()) {
                 statisticsNotBot.addEntry(logEntry);
+                 if (logEntry.getStrIPAddress().equals("104.124.156.139"))
+                 {
+                    // System.out.println(">>" + logEntry.getStrIPAddress());
+                 }
              }
 
         }
@@ -96,6 +105,38 @@ public class Main {
         streamIP.distinct().sorted()
                 .forEach(System.out::println);
          */
+
+        //в связи с завершением курса только основные моменты. Остальные уже были рассмотрены ранее
+
+        // Метод расчёта максимальной посещаемости одним пользователем.
+
+        Stream<String> streamMaxIP = statisticsNotBot.getListIP().stream();
+        /*
+        streamMaxIP.sorted()
+                .forEach(System.out::println);
+        */
+        Map<String, Long> map = streamMaxIP
+                .collect(Collectors.toMap(Function.identity(), x -> 1L, Long::sum));
+        //теперь отберем максимальное значение
+        Stream<Map.Entry<String, Long>> streamMaxOne = map.entrySet().stream();
+
+        System.out.println("Vаксимальная посещаемость одним пользователем");
+        streamMaxOne.sorted(Map.Entry.<String, Long>comparingByValue().reversed()).limit(1)
+                .forEach(x -> System.out.println(x.getKey() + " " + x.getValue()));
+
+
+/*
+        for (Map.Entry<String, Long> entry : map.entrySet())
+        {
+            String key = entry.getKey();
+            Long value = entry.getValue();
+
+            System.out.println(key + "   " + value );
+        }
+*/
+
+
+
 
 
        /* System.out.println("Браузер в последней строке " + strLastLineBrowser);
