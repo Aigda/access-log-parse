@@ -3,6 +3,12 @@ public class UserAgent {
     private final String browserName;
     private final String browserVersion;
     private final String browserOperatingSystem;
+    private final boolean isUserAgentBot;
+    public boolean isBot() {
+        return isUserAgentBot;
+    }
+
+
 
     public String getBrowserName() {
         return browserName;
@@ -23,6 +29,14 @@ public class UserAgent {
         browserName = userAgentParser.getBrowserName();
         browserVersion = userAgentParser.getBrowserVersion();
         browserOperatingSystem = userAgentParser.getBrowserOperatingSystem();
+
+        if (sUserAgent.toLowerCase().indexOf("bot")>0){
+            isUserAgentBot = true;
+        }
+        else {
+            isUserAgentBot = false;
+        }
+
 
     }
 
